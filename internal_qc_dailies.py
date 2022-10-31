@@ -18,19 +18,20 @@ import sys
 from PySide2 import QtUiTools, QtWidgets, QtCore
 
 
-class InternalQcDailies(QtWidgets.QTabWidget):
+class InternalQcDailies(QtWidgets.QWidget):
     
     def __init__(self):
         super().__init__()
         
+        self.setWindowTitle("Internal QC Dailies")
         
+    
     
 
 
 
 def start():
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle('plastique')
     win = InternalQcDailies()
     win.show()
     sys.exit(app.exec_())
