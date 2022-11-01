@@ -41,12 +41,15 @@ class InternalQcDailies(QtWidgets.QWidget):
         self.table = QtWidgets.QTableWidget()
 
         # set headers labels for the table
-        self.table_header_elements = ["username", "show", "shot", "department", "date", "description", "daily"]
+        self.table_header_elements = ["username", "show", "shot", "department", "date", "description", "path"]
         self.table.setColumnCount(len(self.table_header_elements))
         self.table.setHorizontalHeaderLabels(self.table_header_elements)
         
+        
         self.dailies = folder_utils.get_files(folder_path=FOLDER_PATH, file_type=".mp4")
         self.table.setRowCount(len(self.dailies))
+        
+        self.software_for_daily = "vlc"
         
         for row, data in enumerate(self.dailies):
             self.json_data = folder_utils.get_json_data(data.replace(".mp4", "_info.json"))["daily_info"]
@@ -56,9 +59,11 @@ class InternalQcDailies(QtWidgets.QWidget):
                 
                 count += 1
             
-            self.btn_rv = QtWidgets.QPushButton("play")
-            self.table.setCellWidget(row, len(self.table_header_elements) - 1, self.btn_rv)
-            
+
+            self.table.setItem(row, len(self.table_header_elements) - 1, QtWidgets.QTableWidgetItem(data))
+          
+    
+        self.table.doubleClicked.connect(self.play_daily)
 
         self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
         self.table.resizeColumnsToContents()
@@ -83,7 +88,7 @@ class InternalQcDailies(QtWidgets.QWidget):
         rows = self.table.rowCount()
         columns = self.table.columnCount()
         for row in range(rows):
-            for column in range(columns - 1):
+            for column in range(columns):
                 item = self.table.item(row, column).text()
                 if filter_text in item:
                     self.rows_not_hidden.append(row)
@@ -100,6 +105,16 @@ class InternalQcDailies(QtWidgets.QWidget):
                 self.table.setRowHidden(row, False)
         self.rows_not_hidden.clear()
         self.qline_filter.setText("")
+        
+    def play_daily(self):
+        for idx in self.table.selectionModel().selectedIndexes():
+            row_number = idx.row()
+            column_number = idx.column()
+            
+            item = self.table.item(row_number, column_number).text()
+            if os.path.exists(item):
+                os.system(self.software_for_daily + " " + item)
+            
 
 
 def start():
